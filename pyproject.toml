@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "mba-full-cycle-ddd-module"
+version = "0.1.0"
+description = "This project will implement the aplication developed on DDD module of Full Cycle Architecture MBA. It is a Python implementation instead of a Typescript one which was used during the module."
+authors = ["CassiusThalles <cassiustcmendes@hotmail.com>"]
+readme = "README.md"
+packages = [{include = "mba_full_cycle_ddd_module"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = {extras = ["all"], version = "^0.103.2"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
