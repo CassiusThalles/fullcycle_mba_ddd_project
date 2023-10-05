@@ -1,24 +1,53 @@
-from typing import TypedDict, NotRequired, Required
+from typing import Any, TypedDict, NotRequired, Required
 from src.common.domain.aggregate_root import AggregateRoot
+from src.common.domain.value_objects.name_vo import Name
 import json
 
 class CustomerCustomProperties(TypedDict):
     id: NotRequired[str]
     cpf: Required[str]
-    name: Required[str]
+    name: Required[Name]
+    # name: Required[str]
 
 class Customer(AggregateRoot):
     def __init__(self, properties: CustomerCustomProperties):
-        self.id = properties['id']
-        self.cpf = properties['cpf']
-        self.name = properties['name']
+        self._id_ = properties['id']
+        self._cpf_ = properties['cpf']
+        self._name_ = properties['name']
     
     def __dict__(self) -> dict:
         return {
-            'id': self.id,
-            'cpf': self.cpf,
-            'name': self.name
+            'id': self._id_,
+            'cpf': self._cpf_,
+            'name': self._name_
         }
+    
+    @property
+    def id(self) -> str:
+        return self._id_
+    
+    @id.setter
+    def id(self, value: str) -> None:
+        self._id_ = value
+    
+    @property
+    def cpf(self) -> str:
+        return self._cpf_
+    
+    @cpf.setter
+    def cpf(self, value: str) -> None:
+        self._cpf_ = value
+    
+    @property
+    def name(self) -> Name:
+        return self._name_
+    
+    @name.setter
+    def name(self, value: str|Name) -> None:
+        if type(value) == str:
+            self._name_.value = value
+        else:
+            self._name_ = value
     
     @staticmethod
     def create(command: CustomerCustomProperties) -> 'Customer':
