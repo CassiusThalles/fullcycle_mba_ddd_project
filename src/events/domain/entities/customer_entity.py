@@ -1,53 +1,67 @@
-from typing import Any, TypedDict, NotRequired, Required
+from typing import TypedDict, NotRequired, Required
 from src.common.domain.aggregate_root import AggregateRoot
 from src.common.domain.value_objects.name_vo import Name
+from src.common.domain.value_objects.cpf_vo import CPF
 import json
 
 class CustomerCustomProperties(TypedDict):
     id: NotRequired[str]
-    cpf: Required[str]
+    cpf: Required[CPF]
     name: Required[Name]
-    # name: Required[str]
 
 class Customer(AggregateRoot):
     def __init__(self, properties: CustomerCustomProperties):
-        self._id_ = properties['id']
-        self._cpf_ = properties['cpf']
-        self._name_ = properties['name']
+        self.__validate_input(properties)
+        self.__id = properties['id']
+        self.__cpf = properties['cpf']
+        self.__name = properties['name']
+    
+    def __validate_input(self, properties: CustomerCustomProperties) -> None:
+        if('cpf' not in properties or properties['cpf'] == '' or properties['cpf'] == None):
+            raise Exception('CPF is required')
+        if('name' not in properties or properties['name'] == '' or properties['name'] == None):
+            raise Exception('Name is required')
+        if(type(properties['cpf']) != CPF):
+            raise Exception('CPF must be a CPF Value Object instance')
+        if(type(properties['name']) != Name):
+            raise Exception('Name must be a Name Value Object instance')
     
     def __dict__(self) -> dict:
         return {
-            'id': self._id_,
-            'cpf': self._cpf_,
-            'name': self._name_
+            'id': self.__id,
+            'cpf': self.__cpf.value,
+            'name': self.__name.value
         }
     
     @property
     def id(self) -> str:
-        return self._id_
+        return self.__id
     
     @id.setter
     def id(self, value: str) -> None:
-        self._id_ = value
+        self.__id = value
     
     @property
     def cpf(self) -> str:
-        return self._cpf_
+        return self.__cpf
     
     @cpf.setter
-    def cpf(self, value: str) -> None:
-        self._cpf_ = value
+    def cpf(self, new_cpf: str|CPF) -> None:
+        if type(new_cpf) == str:
+            self.__cpf.value = new_cpf
+        else:
+            self.__cpf = CPF(new_cpf.value)
     
     @property
     def name(self) -> Name:
-        return self._name_
+        return self.__name
     
     @name.setter
-    def name(self, value: str|Name) -> None:
-        if type(value) == str:
-            self._name_.value = value
+    def name(self, new_name: str|Name) -> None:
+        if type(new_name) == str:
+            self.__name.value = new_name
         else:
-            self._name_ = value
+            self.__name = Name(new_name.value)
     
     @staticmethod
     def create(command: CustomerCustomProperties) -> 'Customer':
@@ -61,3 +75,10 @@ class Customer(AggregateRoot):
     
     def to_json(self) -> str:
         return json.dumps(self.__dict__())
+    
+    def dtypes(self) -> dict:
+        return {
+            'id': type(self.__id),
+            'cpf': type(self.__cpf),
+            'name': type(self.__name)
+        }

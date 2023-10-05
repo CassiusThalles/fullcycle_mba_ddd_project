@@ -1,19 +1,19 @@
-from typing import Any, Generic, TypeVar
+from typing import Generic, TypeVar
 from types import NotImplementedType
 
 T = TypeVar('T')
 
 class ValueObject(Generic[T]):
     def __init__(self, value: T):
-        self._value_ = value
+        self.__value = value
     
     @property
     def value(self) -> T:
-        return self._value_
+        return self.__value
     
     @value.setter
     def value(self, value: T) -> None:
-        if(self._value_ != value):
+        if(self.__value != value):
             raise Exception('Value cannot be changed')
     
     def __eq__(self, other: T) -> bool:
