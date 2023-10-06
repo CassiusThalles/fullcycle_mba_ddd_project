@@ -2,10 +2,11 @@ from typing import TypedDict, NotRequired, Required
 from src.common.domain.aggregate_root import AggregateRoot
 from src.common.domain.value_objects.name_vo import Name
 from src.common.domain.value_objects.cpf_vo import CPF
+from src.common.domain.value_objects.uuid_vo import UUID
 import json
 
 class CustomerCustomProperties(TypedDict):
-    id: NotRequired[str]
+    id: NotRequired[UUID]
     cpf: Required[CPF]
     name: Required[Name]
 
@@ -70,7 +71,11 @@ class Customer(AggregateRoot):
         if('name' not in command or command['name'] == '' or command['name'] == None):
             raise Exception('Name is required')
         if('id' not in command or command['id'] == '' or command['id'] == None):
-            command['id'] = 'id'
+            command['id'] = UUID()
+        if(type(command['id']) == str):
+            command['id'] = UUID(command['id'])
+        elif(type(command['id']) != UUID):
+            raise Exception('ID must be a UUID Value Object instance')
         return Customer(command)
     
     def to_json(self) -> str:
