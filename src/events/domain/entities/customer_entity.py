@@ -5,14 +5,19 @@ from src.common.domain.value_objects.cpf_vo import CPF
 from src.common.domain.value_objects.uuid_vo import UUID
 import json
 
+class CustomerId(UUID):
+    def __init__(self, value: str = None):
+        super().__init__(value)
+
 class CustomerCustomProperties(TypedDict):
-    id: NotRequired[UUID]
+    id: NotRequired[CustomerId]
     cpf: Required[CPF]
     name: Required[Name]
 
 class Customer(AggregateRoot):
     def __init__(self, properties: CustomerCustomProperties):
         self.__validate_input(properties)
+        self.__validate_id(properties['id'])
         self.__id = properties['id']
         self.__cpf = properties['cpf']
         self.__name = properties['name']
@@ -27,6 +32,12 @@ class Customer(AggregateRoot):
         if(type(properties['name']) != Name):
             raise Exception('Name must be a Name Value Object instance')
     
+    def __validate_id(self, id: str|CustomerId) -> None:
+        if(type(id) == str):
+            id = CustomerId(id)
+        if(type(id) != CustomerId):
+            raise Exception('ID must be a CustomerId Value Object instance')
+
     def __dict__(self) -> dict:
         return {
             'id': self.__id,
@@ -71,11 +82,11 @@ class Customer(AggregateRoot):
         if('name' not in command or command['name'] == '' or command['name'] == None):
             raise Exception('Name is required')
         if('id' not in command or command['id'] == '' or command['id'] == None):
-            command['id'] = UUID()
+            command['id'] = CustomerId()
         if(type(command['id']) == str):
-            command['id'] = UUID(command['id'])
-        elif(type(command['id']) != UUID):
-            raise Exception('ID must be a UUID Value Object instance')
+            command['id'] = CustomerId(command['id'])
+        elif(type(command['id']) != CustomerId):
+            raise Exception('ID must be a CustomerId Value Object instance')
         return Customer(command)
     
     def to_json(self) -> str:
